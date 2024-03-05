@@ -1,3 +1,4 @@
+
 -- --- Lazy Loader -------------------------------------------------------------
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -19,7 +20,7 @@ vim.opt.expandtab       = true
 vim.opt.shiftwidth      = 4
 vim.opt.relativenumber  = true
 vim.opt.number          = true
-vim.opt.colorcolumn     = { 80, 100 }
+vim.opt.colorcolumn     = { 72, 100 }
 vim.opt.cursorline      = true
 vim.g.leader            = '\\'
 
