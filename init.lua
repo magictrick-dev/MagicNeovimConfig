@@ -20,7 +20,7 @@ vim.opt.expandtab       = true
 vim.opt.shiftwidth      = 4
 vim.opt.relativenumber  = true
 vim.opt.number          = true
-vim.opt.colorcolumn     = { 72, 100 }
+vim.opt.colorcolumn     = { 80, 100 }
 vim.opt.cursorline      = true
 vim.g.leader            = '\\'
 
@@ -40,13 +40,71 @@ local gruvbox_theme_configuration =
 
 require("lazy").setup({
     { 'nvim-telescope/telescope.nvim', tag = '0.1.5', dependencies = { 'nvim-lua/plenary.nvim' } },
-    { "ellisonleao/gruvbox.nvim", priority = 1000 , config = true, opts = gruvbox_theme_configuration },
     { 'nvim-treesitter/nvim-treesitter' },
+    { "blazkowolf/gruber-darker.nvim",   opts = { bold = false, italic = { strings = false, comments = false } } },
+    {
+        'nvim-lualine/lualine.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' }
+    }
 })
+
+-- vim.cmd("COQnow --shut-up")
+-- require 'nvim-treesitter.install'.compilers = { "clang", "cl" }
+
+require('nvim-treesitter.configs').setup {
+    highlight = { 
+        enable = true,
+    },
+}
+
+require('lualine').setup {
+  options = {
+    icons_enabled = true,
+    theme = 'auto',
+    component_separators = { left = '', right = ''},
+    section_separators = { left = '', right = ''},
+    disabled_filetypes = {
+      statusline = {},
+      winbar = {},
+    },
+    ignore_focus = {},
+    always_divide_middle = true,
+    globalstatus = false,
+    refresh = {
+      statusline = 1000,
+      tabline = 1000,
+      winbar = 1000,
+    }
+  },
+  sections = {
+    lualine_a = {'mode'},
+    lualine_b = {'branch', 'diff', 'diagnostics'},
+    lualine_c = {'filename'},
+    lualine_x = {'encoding', 'fileformat', 'filetype'},
+    lualine_y = {'progress'},
+    lualine_z = {'location'}
+  },
+  inactive_sections = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = {'filename'},
+    lualine_x = {'location'},
+    lualine_y = {},
+    lualine_z = {}
+  },
+  tabline = {
+      lualine_a = {'filename'},
+      lualine_c = {'windows'},
+  },
+  winbar = {
+  },
+  inactive_winbar = {},
+  extensions = {}
+}
 
 -- --- Set Colorscheme ---------------------------------------------------------
 
-vim.cmd([[colorscheme gruvbox]])
+vim.cmd("colorscheme gruber-darker")
 
 -- --- Maps Configurations -----------------------------------------------------
 
