@@ -20,6 +20,7 @@ vim.opt.expandtab       = true
 vim.opt.shiftwidth      = 4
 vim.opt.relativenumber  = true
 vim.opt.number          = true
+vim.opt.formatoptions   = 'croq'
 vim.opt.colorcolumn     = { 80, 100 }
 vim.opt.cursorline      = true
 vim.g.leader            = '\\'
@@ -42,19 +43,17 @@ require("lazy").setup({
     { 'nvim-telescope/telescope.nvim', tag = '0.1.5', dependencies = { 'nvim-lua/plenary.nvim' } },
     { 'nvim-treesitter/nvim-treesitter' },
     { "blazkowolf/gruber-darker.nvim",   opts = { bold = false, italic = { strings = false, comments = false } } },
-    {
-        'nvim-lualine/lualine.nvim',
-        dependencies = { 'nvim-tree/nvim-web-devicons' }
-    }
+    { 'nvim-lualine/lualine.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' } }
 })
 
 -- vim.cmd("COQnow --shut-up")
 -- require 'nvim-treesitter.install'.compilers = { "clang", "cl" }
 
-require('nvim-treesitter.configs').setup {
-    highlight = { 
-        enable = true,
-    },
+require'nvim-treesitter.configs'.setup {
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
 }
 
 require('lualine').setup {
@@ -117,21 +116,4 @@ vim.keymap.set('n', '<S-tab>', ':bprevious<cr>', {})    -- Prev buffer.
 vim.keymap.set('n', '<leader>bk', ':bp|bd! #<cr>', {})  -- Kill buffer.
 vim.keymap.set('n', '<leader>bs', ':vsplit<cr><C-w><C-w>', {})    -- Split buffer.
 vim.keymap.set('n', '<leader>bn', ':bn<cr>', {})        -- new buffer.
-
-vim.keymap.set('n', '<leader>ls', '^', {})
-vim.keymap.set('n', '<leader>le', '$', {})
-
-vim.keymap.set('n', '<leader>dl', 'dd', {})
-vim.keymap.set('n', '<leader>drl', 'ddO', {})
-vim.keymap.set('n', '<leader>de', 'd$', {})
-vim.keymap.set('n', '<leader>dre', 'd$a', {})
-
-vim.keymap.set('n', '<leader>d(', 'F(lvf)hd<esc>', {})
-vim.keymap.set('n', '<leader>dr(', 'F(lvf)hd<esc>i', {})
-
-vim.keymap.set('n', '<leader>d"', 'F"lvf"hd<esc>', {})
-vim.keymap.set('n', '<leader>dr"', 'F"lvf"hd<esc>i', {})
-
-
-
 
