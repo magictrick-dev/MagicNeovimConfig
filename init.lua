@@ -49,6 +49,7 @@ require("lazy").setup({
     { 'neovim/nvim-lspconfig' },
     { 'hrsh7th/cmp-nvim-lsp' },
     { 'hrsh7th/nvim-cmp' },
+    { 'echasnovski/mini.nvim', version = false },
 })
 
 -- vim.cmd("COQnow --shut-up")
@@ -164,3 +165,5 @@ lspconfig.clangd.setup({
     fallbackFlags = { '-std=c++17' },
   },
 })
+
+require('mini.completion').setup()
