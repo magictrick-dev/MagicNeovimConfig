@@ -1,5 +1,3 @@
-
-
 -- --- Lazy Loader -------------------------------------------------------------
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -25,6 +23,7 @@ vim.opt.formatoptions   = 'croq'
 vim.opt.colorcolumn     = { 80, 100 }
 vim.opt.cursorline      = true
 vim.g.leader            = '\\'
+vim.opt.signcolumn      = 'yes'
 
 -- --- Plugins Installation ----------------------------------------------------
 
@@ -45,21 +44,81 @@ require("lazy").setup({
     { 'nvim-treesitter/nvim-treesitter' },
     { "blazkowolf/gruber-darker.nvim", opts = { bold = false, italic = { strings = false, comments = false } } },
     { 'nvim-lualine/lualine.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' } },
-    { 'github/copilot.vim' },
-    { 'neovim/nvim-lspconfig' },
-    { 'hrsh7th/cmp-nvim-lsp' },
-    { 'hrsh7th/nvim-cmp' },
-    { 'echasnovski/mini.nvim', version = false },
+    {
+        "neovim/nvim-lspconfig",
+        config = function() 
+            require'lspconfig'.clangd.setup{}  
+        end,
+    },
+    { 'hrsh7th/cmp-nvim-lsp'    },
+    { 'hrsh7th/cmp-buffer'      },
+    { 'hrsh7th/cmp-path'        },
+    { 'hrsh7th/cmp-cmdline'     },
+    { 'hrsh7th/nvim-cmp'        },
+    { 'hrsh7th/cmp-vsnip'       },
+    { 'hrsh7th/vim-vsnip'       },
+})
+
+local lspconfig = require("lspconfig")
+
+local on_attach = function(_, bufnr)
+  local bufmap = function(mode, lhs, rhs)
+    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true })
+  end
+
+  -- Jump to definition
+  bufmap("n", "gd", vim.lsp.buf.definition)
+  -- Jump to declaration
+  bufmap("n", "gD", vim.lsp.buf.declaration)
+  -- Show hover docs
+  bufmap("n", "gk", vim.lsp.buf.hover)
+  -- List references
+  bufmap("n", "gr", vim.lsp.buf.references)
+  -- Show signature help
+  bufmap("n", "gh", vim.lsp.buf.signature_help)
+end
+
+lspconfig.clangd.setup({
+    on_attach = on_attach,
+    cmd = { "clangd", "--compile-commands-dir=build" }, -- set if not in project root
+})
+
+-- Set up nvim-cmp.
+local cmp = require'cmp'
+cmp.setup({
+    snippet = {
+      -- REQUIRED - you must specify a snippet engine
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+      end,
+    },
+    window = {
+      -- completion = cmp.config.window.bordered(),
+      -- documentation = cmp.config.window.bordered(),
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    }),
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' }, -- For vsnip users.
+    }, {
+      { name = 'buffer' },
+    })
 })
 
 -- vim.cmd("COQnow --shut-up")
 -- require 'nvim-treesitter.install'.compilers = { "clang", "cl" }
 
 require'nvim-treesitter.configs'.setup {
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+    },
 }
 
 require('lualine').setup {
@@ -122,48 +181,5 @@ vim.keymap.set('n', '<S-tab>', ':bprevious<cr>', {})    -- Prev buffer.
 vim.keymap.set('n', '<leader>bk', ':bp|bd! #<cr>', {})  -- Kill buffer.
 vim.keymap.set('n', '<leader>bs', ':vsplit<cr><C-w><C-w>', {})    -- Split buffer.
 vim.keymap.set('n', '<leader>bn', ':bn<cr>', {})        -- new buffer.
-
--- --- Language Server Protocol ------------------------------------------------
-
--- Reserve a space in the gutter
--- This will avoid an annoying layout shift in the screen
-vim.opt.signcolumn = 'yes'
-
--- Add cmp_nvim_lsp capabilities settings to lspconfig
--- This should be executed before you configure any language server
-local lspconfig_defaults = require('lspconfig').util.default_config
-lspconfig_defaults.capabilities = vim.tbl_deep_extend(
-  'force',
-  lspconfig_defaults.capabilities,
-  require('cmp_nvim_lsp').default_capabilities()
-)
-
--- This is where you enable features that only work
--- if there is a language server active in the file
-vim.api.nvim_create_autocmd('LspAttach', {
-  desc = 'LSP actions',
-  callback = function(event)
-    local opts = {buffer = event.buf}
-
-    vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-    vim.keymap.set('n', '<leader>jtd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-    vim.keymap.set('n', '<leader>jtD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-    vim.keymap.set('n', '<leader>ji', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-    vim.keymap.set('n', '<leader>jd', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-    vim.keymap.set('n', '<leader>jr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-    vim.keymap.set('n', '<leader>js', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-    vim.keymap.set('n', '<leader>jn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-    vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
-    vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
-  end,
-})
-
-local lspconfig = require('lspconfig')
-lspconfig.clangd.setup({
-  cmd = {'clangd', '--background-index', '--clang-tidy', '--log=verbose'},
-  init_options = {
-    fallbackFlags = { '-std=c++17' },
-  },
-})
-
-require('mini.completion').setup()
+vim.keymap.set('n', 'gD',   '<cmd>lua vim.lsp.buf.declaration()<CR>')
+vim.keymap.set('n', 'gd',   '<cmd>lua vim.lsp.buf.definition()<CR>')
